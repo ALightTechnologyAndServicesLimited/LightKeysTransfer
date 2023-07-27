@@ -90,5 +90,25 @@ namespace LightKeysTransfer
             var str = Convert.ToBase64String(b);
             return str.Substring(0, length);
         }
+
+        public static bool InitializeRSA(string publicKey)
+        {
+            try
+            {
+                if (rsa == null)
+                {
+                    GenerateRSAKeyPair();
+                }
+
+                rsa.FromXmlString(publicKey);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            return false;
+        }
     }
 }

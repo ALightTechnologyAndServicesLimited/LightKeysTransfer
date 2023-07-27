@@ -65,6 +65,81 @@ namespace LightKeysTransfer.Implementation
         {
             Console.WriteLine("Enter the public key generated on the client instance of the application, enter the key here and immediately clear the clipboard:");
             var publicKey = Util.GetSensitiveText();
+            var result = Util.InitializeRSA(publicKey);
+            if (!result)
+            {
+                Console.WriteLine("There has been an error!");
+                Console.WriteLine("Press <ENTER> to return to menu.");
+                Console.ReadLine();
+                return;
+            }
+            Console.WriteLine("The key has been loaded.");
+            var fileName = GetFileName();
+            if (String.IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+
+            var content = String.Empty;
+
+            try
+            {
+                content = GetFileContent(fileName);
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
+        private string GetFileContent(string fileName)
+        {
+            var sr = new StreamReader(fileName);
+            var content = sr.ReadToEnd();
+            sr.Close();
+
+            return content;
+        }
+
+        private string GetFileName()
+        {
+            var isValidFile = false;
+            var fileName = String.Empty;
+
+            while (!isValidFile)
+            {
+                Console.WriteLine("Enter the path of the file whose content needs to encrypted (the file content can be upto 500 chars), or empty string for previous menu.");
+
+                fileName = Console.ReadLine();
+                if (String.IsNullOrEmpty(fileName))
+                {
+                    return String.Empty;
+                }
+
+                isValidFile = File.Exists(fileName);
+                if (!isValidFile)
+                {
+                    Console.WriteLine("Invalid file path.");
+                }
+                if (isValidFile)
+                {
+                    try
+                    {
+                        FileInfo fi = new FileInfo(fileName);
+                        if (fi.Length > 500)
+                        {
+                            Console.WriteLine("Error: File length longer than 500.");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"Error occurred - {e.Message}");
+                        return String.Empty;
+                    }
+                }
+            }
+
+            return fileName;
         }
 
         private int ShowMenu()
