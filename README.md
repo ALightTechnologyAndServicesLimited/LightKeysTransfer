@@ -2,6 +2,8 @@
 
 Free, OpenSource utility for securely performing some configuration related activities.
 
+Status: Early Stages, Active Development.
+
 ## Problem:
 TOES - Terrorist Odour Mafia i.e the psychos/hackers/identity thieves/identity distorters/human rights violators/mafia/extortionists/privacy violators/Intellectual property thieves with powerful 
 swarm of spying invisible micro-drones capable of viewing, screenshotting, listening, whispering, emitting / re-playing audio and even mind-reading.
