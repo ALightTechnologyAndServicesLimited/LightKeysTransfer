@@ -43,11 +43,13 @@ namespace LightKeysTransfer
 
         public static string DecryptText(string text)
         {
+            if (String.IsNullOrEmpty(text)) return text;
+
             try
             {
                 var bytes = Convert.FromBase64String(text);
                 var decryptedBytes = rsa.Decrypt(bytes, RSAEncryptionPadding.OaepSHA512);
-                var plainText = ASCIIEncoding.ASCII.GetString(decryptedBytes);
+                var plainText = UTF8Encoding.UTF8.GetString(decryptedBytes);
                 int skipLength = plainText.Length / 3;
                 return plainText.Substring(0, plainText.Length - skipLength);
             }
@@ -61,11 +63,13 @@ namespace LightKeysTransfer
 
         public static string EncryptText(string text)
         {
+            if (String.IsNullOrEmpty(text)) return text;
+
             try
             {
                 int saltLength = text.Length / 2;
                 text = text + GetRandomSalt(saltLength);
-                var bytes = ASCIIEncoding.ASCII.GetBytes(text);
+                var bytes = UTF8Encoding.UTF8.GetBytes(text);
                 var encryptedByte = rsa.Encrypt(bytes, RSAEncryptionPadding.OaepSHA512);
                 var encryptedText = Convert.ToBase64String(encryptedByte);
                 return encryptedText;

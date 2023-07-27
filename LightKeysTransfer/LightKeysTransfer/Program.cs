@@ -4,10 +4,6 @@ using LightKeysTransfer.Entities;
 using LightKeysTransfer.Implementation;
 using Microsoft.Extensions.DependencyInjection;
 
-Util.GenerateRSAKeyPair();
-var enc = Util.EncryptText("Hello!");
-Util.DecryptText(enc);
-
 PrintITStartupInfo();
 
 try
