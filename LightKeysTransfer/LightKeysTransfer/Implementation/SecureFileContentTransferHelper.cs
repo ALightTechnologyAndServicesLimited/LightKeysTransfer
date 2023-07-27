@@ -59,6 +59,14 @@ namespace LightKeysTransfer.Implementation
             Util.ClearClipBoard();
             Console.WriteLine("Enter the encrypted text:");
             var response = Util.GetSensitiveText();
+            var plainText = Util.DecryptText(response);
+            Console.WriteLine("The text has been decrypted.");
+            Console.WriteLine("Press <ENTER> to copy to clipboard");
+            Console.ReadLine();
+            Util.CopyToClipBoard(plainText);
+            Console.WriteLine("The text has been copied. Press <ENTER> to clear clipboard");
+            Util.ClearClipBoard();
+            Console.WriteLine("The text has been cleared");
         }
 
         private void ServerMode()
@@ -85,10 +93,19 @@ namespace LightKeysTransfer.Implementation
             try
             {
                 content = GetFileContent(fileName);
+                Console.WriteLine("Conent read, encrypting...");
+                var enc = Util.EncryptText(content);
+                Console.WriteLine(enc);
+                Console.WriteLine();
+                Console.WriteLine("Press <ENTER> to clear screen and goto previous menu.");
+                Console.ReadLine();
+                Console.Clear();
+                return;
             }
             catch (Exception e)
             {
-
+                Console.WriteLine($"error occurred. {e.Message}");
+                Console.WriteLine("Press <ENTER> for previous menu");
             }
         }
 

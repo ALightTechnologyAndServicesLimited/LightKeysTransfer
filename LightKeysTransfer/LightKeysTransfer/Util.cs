@@ -110,5 +110,10 @@ namespace LightKeysTransfer
 
             return false;
         }
+
+        public static void CopyToClipBoard(string plainText)
+        {
+            ClipboardService.SetText(plainText);
+        }
     }
 }
