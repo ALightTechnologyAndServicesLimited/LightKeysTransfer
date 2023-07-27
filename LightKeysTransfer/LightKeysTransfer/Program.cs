@@ -1,7 +1,12 @@
-﻿using LightKeysTransfer.Abstract;
+﻿using LightKeysTransfer;
+using LightKeysTransfer.Abstract;
 using LightKeysTransfer.Entities;
 using LightKeysTransfer.Implementation;
 using Microsoft.Extensions.DependencyInjection;
+
+Util.GenerateRSAKeyPair();
+var enc = Util.EncryptText("Hello!");
+Util.DecryptText(enc);
 
 PrintITStartupInfo();
 
@@ -35,6 +40,8 @@ try
                     case KeyTransferResult.Errored:
                         Console.WriteLine("Seems like an error happened :(. Please send an email, if you want - admin@alightservices.com / kantikalyan.arumilli@alightservices.com / kantikalyan@outlook.com / kantikalyan@gmail.com");
                         break;
+                    default:
+                        break;
                 }
             }
             catch (Exception e)
@@ -67,8 +74,15 @@ IKeyTransferHelper ShowLevel1Menu(IEnumerable<IKeyTransferHelper> helpers)
 
     if (Int32.TryParse(response, out responseIndex))
     {
-        if (responseIndex == count) return null;
-
+        if (responseIndex == count)
+        {
+            return null;
+        }
+        if (responseIndex < 1 || responseIndex > count)
+        {
+            Console.WriteLine("Invalid input, please enter valid selection");
+            ShowLevel1Menu(helpers);
+        }
         return helpers.ElementAt(responseIndex - 1);
     }
     else
