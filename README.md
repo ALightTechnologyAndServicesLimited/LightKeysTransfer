@@ -28,6 +28,17 @@ I am hoping these tools would help someone.
 
 The entire code base is based on .Net, developed in C#.
 
+## Features:
+1) Transferring content of small files from server to client completed - August 1st 2023 - v0.0.1
+
+## Roadmap:
+1) Transferring content of small files from client to server.
+2) Replacing content of some arbitrary text inside configuration files on server side
+3) Replacing content of some arbitrary text inside configuration files on client side
+4) Add/update Azure KeyVault secrets
+5) Transferring output of arbitrary command from server to client.
+6) Transferring output of arbitray command from client to server.
+
 ### Personal Links:
 [Facebook - Kanti Arumilli](https://www.facebook.com/kanti.arumilli)
 [LinkedIn - Kanti Kalyan Arumilli](https://www.linkedin.com/in/kanti-kalyan-arumilli/)
