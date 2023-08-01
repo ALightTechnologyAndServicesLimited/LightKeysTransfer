@@ -14,6 +14,21 @@ namespace LightKeysTransfer.Implementation
 
         public KeyTransferResult Perform()
         {
+            int taskId = ShowSubTasksMenu();
+
+            switch (taskId)
+            {
+                case 1:
+                    return ClipBoardToServer();
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    return KeyTransferResult.Incomplete;
+            }
+
             while (true)
             {
                 Console.Clear();
@@ -46,6 +61,119 @@ namespace LightKeysTransfer.Implementation
             return KeyTransferResult.Incomplete;
         }
 
+        private KeyTransferResult ClipBoardToServer()
+        {
+            Console.Clear();
+            Console.WriteLine("Enter the text below and press <ENTER>");
+            var secret = Util.GetSensitiveText();
+            return HandleSecretData(secret);
+        }
+
+        private KeyTransferResult HandleSecretData(string secret)
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("1. Write to a file?");
+                Console.WriteLine("2. Replace some text in a file?");
+                Console.WriteLine("3. End");
+                Console.WriteLine("Please make valid choice:");
+
+                var response = Console.ReadLine();
+                var responseInt = 0;
+                if (Int32.TryParse(response, out responseInt))
+                {
+                    if (responseInt < 1 || responseInt > 3) continue;
+
+                    switch (responseInt)
+                    {
+                        case 1:
+                            return HandleWriteToFile(secret);
+                        case 2:
+                            return HandleReplaceText(secret);
+                        case 3:
+                            return KeyTransferResult.Incomplete;
+                    }
+                }
+
+                Console.WriteLine("Invalid response, press <ENTER>");
+                Console.ReadLine();
+            }
+        }
+
+        private KeyTransferResult HandleReplaceText(string secret)
+        {
+            try
+            {
+                Console.WriteLine("Enter path to text file.");
+                var filePath = Console.ReadLine();
+                Console.WriteLine("Replace text pattern can be something like:");
+                Console.WriteLine("<abcd>[SECRET]</abcd> - in this case [SECRET] would be replaced.");
+                Console.WriteLine("or");
+                Console.WriteLine("XXXXXXX - in this case XXXXXXX would be replaced");
+                Console.WriteLine("or");
+                Console.WriteLine("\"key\": \"[SECRET]\" - in this case [SECRET] would be replaced.");
+                Console.WriteLine("Please enter a valid pattern:");
+
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            return KeyTransferResult.Incomplete;
+        }
+
+        private KeyTransferResult HandleWriteToFile(string secret)
+        {
+            try
+            {
+                Console.WriteLine("Enter path to the file:");
+                var filePath = Console.ReadLine();
+
+                var sw = new StreamWriter(filePath);
+                sw.Write(secret);
+                sw.Close();
+
+                Console.WriteLine("Done! Press <ENTER> to continue...");
+                Console.ReadLine();
+                return KeyTransferResult.Success;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return KeyTransferResult.Errored;
+            }
+        }
+
+        private int ShowSubTasksMenu()
+        {
+            var flag = true;
+
+            while (flag)
+            {
+                Console.Clear();
+                Console.WriteLine("1. Transfer small information directly by pasting from clipboard of client to server?");
+                Console.WriteLine("2. Encrypt and transfer small information from client to server?");
+                Console.WriteLine("3. Transfer data from server to client?");
+                Console.WriteLine("4. Previous menu");
+                Console.WriteLine("Please make valid selection and press <ENTER>");
+                var response = Console.ReadLine();
+                var responseInt = 0;
+                if (Int32.TryParse(response, out responseInt))
+                {
+                    if (responseInt >= 1 && responseInt <= 4)
+                    {
+                        return responseInt;
+                    }
+                }
+                Console.WriteLine("Invalid Response, press <ENTER>");
+                Console.ReadLine();
+            }
+
+            return 0;
+        }
+
         private void ClientMode()
         {
             Console.WriteLine("PRESS <ENTER> to generate new public / private key pair.");
@@ -53,6 +181,7 @@ namespace LightKeysTransfer.Implementation
             Util.GenerateRSAKeyPair();
             Console.WriteLine("New key pair has been generated.");
             Console.WriteLine("Press <ENTER> to copy the public key into clipboard.");
+            Console.ReadLine();
             Util.CopyPublicKey();
             Console.WriteLine("The public key has been copied to clipboard, press <ENTER> after pasting in the server instance to clear the clipboard.");
             Console.ReadLine();
