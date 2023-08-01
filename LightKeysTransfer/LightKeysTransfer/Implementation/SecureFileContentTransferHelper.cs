@@ -64,7 +64,11 @@ namespace LightKeysTransfer.Implementation
             Console.WriteLine("Press <ENTER> to copy to clipboard");
             Console.ReadLine();
             Util.CopyToClipBoard(plainText);
-            Console.WriteLine("The text has been copied. Press <ENTER> to clear clipboard");
+            Console.WriteLine("The text has been copied.");
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Press <ENTER> to clear clipboard");
+            Console.ReadLine();
             Util.ClearClipBoard();
             Console.WriteLine("The text has been cleared");
         }
