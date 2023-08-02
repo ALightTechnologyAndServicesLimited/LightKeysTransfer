@@ -16,52 +16,54 @@ namespace LightKeysTransfer.Implementation
         {
             int taskId = ShowSubTasksMenu();
 
-            switch (taskId)
+            return taskId switch
             {
-                case 1:
-                    return ClipBoardToServer();
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                case 4:
-                    return KeyTransferResult.Incomplete;
-            }
+                1 => ClientClipBoardToServer(),
+                2 => ServerToClient(),
+                3 => KeyTransferResult.Incomplete,
+                _ => KeyTransferResult.Incomplete,
+            };
 
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine(MainText);
-                Console.WriteLine();
-                Console.WriteLine();
-                ShowHelp();
-                Console.Clear();
-                var selection = ShowMenu();
+            //while (true)
+            //{
+            //    Console.Clear();
+            //    Console.WriteLine(MainText);
+            //    Console.WriteLine();
+            //    Console.WriteLine();
+            //    ShowHelp();
+            //    Console.Clear();
+            //    var selection = ShowMenu();
 
-                switch (selection)
-                {
-                    case 1:
-                        ServerMode();
-                        break;
-                    case 2:
-                        ClientMode();
-                        break;
-                    case 3:
-                        ShowHelp();
-                        selection = ShowMenu();
-                        break;
-                    case 4:
-                        return KeyTransferResult.Incomplete;
-                    default:
-                        break;
-                }
-            }
+            //    switch (selection)
+            //    {
+            //        case 1:
+            //            ServerMode();
+            //            break;
+            //        case 2:
+            //            ClientMode();
+            //            break;
+            //        case 3:
+            //            ShowHelp();
+            //            selection = ShowMenu();
+            //            break;
+            //        case 4:
+            //            return KeyTransferResult.Incomplete;
+            //        default:
+            //            break;
+            //    }
+            //}
 
             return KeyTransferResult.Incomplete;
         }
 
-        private KeyTransferResult ClipBoardToServer()
+        private static KeyTransferResult ServerToClient()
+        {
+            //1. FileContent to ClipBoard
+
+            return KeyTransferResult.Incomplete;
+        }
+
+        private static KeyTransferResult ClientClipBoardToServer()
         {
             Console.Clear();
             Console.WriteLine("Enter the text below and press <ENTER>");
@@ -69,7 +71,7 @@ namespace LightKeysTransfer.Implementation
             return HandleSecretData(secret);
         }
 
-        private KeyTransferResult HandleSecretData(string secret)
+        private static KeyTransferResult HandleSecretData(string secret)
         {
             while (true)
             {
@@ -80,8 +82,7 @@ namespace LightKeysTransfer.Implementation
                 Console.WriteLine("Please make valid choice:");
 
                 var response = Console.ReadLine();
-                var responseInt = 0;
-                if (Int32.TryParse(response, out responseInt))
+                if (Int32.TryParse(response, out int responseInt))
                 {
                     if (responseInt < 1 || responseInt > 3) continue;
 
@@ -101,7 +102,7 @@ namespace LightKeysTransfer.Implementation
             }
         }
 
-        private KeyTransferResult HandleReplaceText(string secret)
+        private static KeyTransferResult HandleReplaceText(string secret)
         {
             try
             {
@@ -114,17 +115,90 @@ namespace LightKeysTransfer.Implementation
                 Console.WriteLine("or");
                 Console.WriteLine("\"key\": \"[SECRET]\" - in this case [SECRET] would be replaced.");
                 Console.WriteLine("Please enter a valid pattern:");
+                var response = Console.ReadLine();
 
+                var sr = new StreamReader(filePath);
+                var content = sr.ReadToEnd();
+                sr.Close();
+
+                if (response.Contains("[SECRET]", StringComparison.CurrentCulture))
+                {
+                    var tokens = response.Split("[SECRET]");
+                    if (tokens.Length != 2)
+                    {
+                        Console.WriteLine("Error in pattern.");
+                        return KeyTransferResult.Errored;
+                    }
+
+                    var newContent = new StringBuilder();
+                    if (content.Contains(tokens[0], StringComparison.CurrentCulture))
+                    {
+                        if (content.IndexOf(tokens[1]) > 0)
+                        {
+                            newContent.Append(content.AsSpan(0, content.IndexOf(tokens[0])));
+                        }
+
+                        newContent.Append(secret);
+
+                        if (content.IndexOf(tokens[2]) > 0)
+                        {
+                            newContent.Append(content.AsSpan((content.IndexOf(tokens[2]))));
+
+                            var sw = new StreamWriter(filePath);
+                            sw.Write(newContent.ToString());
+                            sw.Close();
+
+                            Console.WriteLine("Success. Press <ENTER> to continue...");
+                            Console.ReadLine();
+                            return KeyTransferResult.Success;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Pattern Not Found Press <ENTER> to continue...");
+                            Console.ReadLine();
+                            return KeyTransferResult.Incomplete;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Pattern Not Found Press <ENTER> to continue...");
+                        Console.ReadLine();
+                        return KeyTransferResult.Incomplete;
+                    }
+                }
+                else
+                {
+                    //var newContent = new StringBuilder();
+                    if (content.Contains(response, StringComparison.CurrentCulture))
+                    {
+                        var newContent = content.Replace(response, secret);
+                        var sw = new StreamWriter(filePath);
+                        sw.Write(newContent.ToString());
+                        sw.Close();
+
+                        Console.WriteLine("Success. Press <ENTER> to continue...");
+                        Console.ReadLine();
+                        return KeyTransferResult.Success;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Pattern Not Found. Press <ENTER> to continue...");
+                        Console.ReadLine();
+                        return KeyTransferResult.Incomplete;
+                    }
+                }
             }
             catch (Exception e)
             {
-
+                Console.WriteLine(e.Message);
+                Console.WriteLine("Press <ENTER> to continue");
+                return KeyTransferResult.Errored;
             }
 
             return KeyTransferResult.Incomplete;
         }
 
-        private KeyTransferResult HandleWriteToFile(string secret)
+        private static KeyTransferResult HandleWriteToFile(string secret)
         {
             try
             {
@@ -146,7 +220,7 @@ namespace LightKeysTransfer.Implementation
             }
         }
 
-        private int ShowSubTasksMenu()
+        private static int ShowSubTasksMenu()
         {
             var flag = true;
 
@@ -154,13 +228,11 @@ namespace LightKeysTransfer.Implementation
             {
                 Console.Clear();
                 Console.WriteLine("1. Transfer small information directly by pasting from clipboard of client to server?");
-                Console.WriteLine("2. Encrypt and transfer small information from client to server?");
-                Console.WriteLine("3. Transfer data from server to client?");
-                Console.WriteLine("4. Previous menu");
+                Console.WriteLine("2. Encrypt and transfer content of a small file from server to client clipboard?");
+                Console.WriteLine("3. Previous menu");
                 Console.WriteLine("Please make valid selection and press <ENTER>");
                 var response = Console.ReadLine();
-                var responseInt = 0;
-                if (Int32.TryParse(response, out responseInt))
+                if (Int32.TryParse(response, out int responseInt))
                 {
                     if (responseInt >= 1 && responseInt <= 4)
                     {
@@ -174,7 +246,7 @@ namespace LightKeysTransfer.Implementation
             return 0;
         }
 
-        private void ClientMode()
+        private static void ClientMode()
         {
             Console.WriteLine("PRESS <ENTER> to generate new public / private key pair.");
             Console.ReadLine();
@@ -202,7 +274,7 @@ namespace LightKeysTransfer.Implementation
             Console.WriteLine("The text has been cleared");
         }
 
-        private void ServerMode()
+        private static void ServerMode()
         {
             Console.WriteLine("Enter the public key generated on the client instance of the application, enter the key here and immediately clear the clipboard:");
             var publicKey = Util.GetSensitiveText();
@@ -221,11 +293,9 @@ namespace LightKeysTransfer.Implementation
                 return;
             }
 
-            var content = String.Empty;
-
             try
             {
-                content = GetFileContent(fileName);
+                string? content = GetFileContent(fileName);
                 Console.WriteLine("Conent read, encrypting...");
                 var enc = Util.EncryptText(content);
                 Console.WriteLine(enc);
@@ -242,7 +312,7 @@ namespace LightKeysTransfer.Implementation
             }
         }
 
-        private string GetFileContent(string fileName)
+        private static string GetFileContent(string fileName)
         {
             var sr = new StreamReader(fileName);
             var content = sr.ReadToEnd();
@@ -251,7 +321,7 @@ namespace LightKeysTransfer.Implementation
             return content;
         }
 
-        private string GetFileName()
+        private static string GetFileName()
         {
             var isValidFile = false;
             var fileName = String.Empty;
@@ -275,7 +345,7 @@ namespace LightKeysTransfer.Implementation
                 {
                     try
                     {
-                        FileInfo fi = new FileInfo(fileName);
+                        FileInfo fi = new(fileName);
                         if (fi.Length > 500)
                         {
                             Console.WriteLine("Error: File length longer than 500.");
@@ -301,8 +371,7 @@ namespace LightKeysTransfer.Implementation
             Console.WriteLine();
             Console.WriteLine("Please enter your selection:");
             var response = Console.ReadLine();
-            var selection = 0;
-            if (Int32.TryParse(response, out selection))
+            if (Int32.TryParse(response, out int selection))
             {
                 return selection;
             }
@@ -315,7 +384,7 @@ namespace LightKeysTransfer.Implementation
             return 0;
         }
 
-        void ShowHelp()
+        static void ShowHelp()
         {
             Console.WriteLine("This mode allows transferring content of some small file securely without using SFTP or SCP.");
             Console.WriteLine("The file can be on the server, the content gets transferred encrypted, without getting stored on the client.");
