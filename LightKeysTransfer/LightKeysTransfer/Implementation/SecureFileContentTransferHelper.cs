@@ -58,7 +58,34 @@ namespace LightKeysTransfer.Implementation
 
         private static KeyTransferResult ServerToClient()
         {
-            //1. FileContent to ClipBoard
+            while (true)
+            {
+                Console.Clear();
+                //Console.WriteLine(MainText);
+                Console.WriteLine();
+                Console.WriteLine();
+                ShowHelp();
+                Console.Clear();
+                var selection = ShowMenu();
+
+                switch (selection)
+                {
+                    case 1:
+                        ServerMode();
+                        break;
+                    case 2:
+                        ClientMode();
+                        break;
+                    case 3:
+                        ShowHelp();
+                        selection = ShowMenu();
+                        break;
+                    case 4:
+                        return KeyTransferResult.Incomplete;
+                    default:
+                        break;
+                }
+            }
 
             return KeyTransferResult.Incomplete;
         }
@@ -109,11 +136,15 @@ namespace LightKeysTransfer.Implementation
                 Console.WriteLine("Enter path to text file.");
                 var filePath = Console.ReadLine();
                 Console.WriteLine("Replace text pattern can be something like:");
+                Console.WriteLine("Approach-1:");
                 Console.WriteLine("<abcd>[SECRET]</abcd> - in this case [SECRET] would be replaced.");
+                Console.WriteLine("Use [SECRET] as the placeholder, no wild-cards");
+                Console.WriteLine("Example \"key1\": \"[SECRET]\",");
+                Console.WriteLine();
                 Console.WriteLine("or");
+                Console.WriteLine("Approach-2:");
                 Console.WriteLine("XXXXXXX - in this case XXXXXXX would be replaced");
-                Console.WriteLine("or");
-                Console.WriteLine("\"key\": \"[SECRET]\" - in this case [SECRET] would be replaced.");
+                Console.WriteLine("If you know the exact content to be replaced, do NOT use [SECRET] anywhere in the placeholder");
                 Console.WriteLine("Please enter a valid pattern:");
                 var response = Console.ReadLine();
 
@@ -296,8 +327,43 @@ namespace LightKeysTransfer.Implementation
             try
             {
                 string? content = GetFileContent(fileName);
+                Console.WriteLine("Content has been read.");
+                int selection = ShowFilePartMenu();
+                var contentToEncrypt = String.Empty;
+
+                switch (selection)
+                {
+                    case 1:
+                        contentToEncrypt = content;
+                        break;
+                    case 2:
+                        var lines = content.Split("\n");
+                        var validSelection = false;
+
+                        while (!validSelection)
+                        {
+                            Console.WriteLine($"Enter the line number ({lines.Count()} lines found.):");
+                            var lnn = Console.ReadLine();
+                            int lnnNum = 0;
+                            if (Int32.TryParse(lnn, out lnnNum))
+                            {
+                                if (lnnNum > 0 && lnnNum <= lines.Count())
+                                {
+                                    contentToEncrypt = lines[lnnNum + 1];
+                                    validSelection = true;
+                                }
+                            }
+                        }
+                        break;
+                    case 3:
+                        return;
+                        break;
+                    default:
+                        break;
+                }
+
                 Console.WriteLine("Conent read, encrypting...");
-                var enc = Util.EncryptText(content);
+                var enc = Util.EncryptText(contentToEncrypt);
                 Console.WriteLine(enc);
                 Console.WriteLine();
                 Console.WriteLine("Press <ENTER> to clear screen and goto previous menu.");
@@ -310,6 +376,30 @@ namespace LightKeysTransfer.Implementation
                 Console.WriteLine($"error occurred. {e.Message}");
                 Console.WriteLine("Press <ENTER> for previous menu");
             }
+        }
+
+        private static int ShowFilePartMenu()
+        {
+            bool hasSelectionBeenMade = false;
+            while (!hasSelectionBeenMade)
+            {
+                Console.WriteLine("1. Encrypt entire contents?");
+                Console.WriteLine("2. Particular line based on number?");
+                Console.WriteLine("3. End");
+                Console.WriteLine("Please make a selection: ");
+                var selection = Console.ReadLine();
+
+                var selectionAsInt = 0;
+                if (Int32.TryParse(selection, out selectionAsInt))
+                {
+                    if (selectionAsInt > 0 && selectionAsInt < 4)
+                    {
+                        return selectionAsInt;
+                    }
+                }
+            }
+
+            return 0;
         }
 
         private static string GetFileContent(string fileName)
@@ -362,7 +452,7 @@ namespace LightKeysTransfer.Implementation
             return fileName;
         }
 
-        private int ShowMenu()
+        private static int ShowMenu()
         {
             Console.WriteLine("1. Server Mode");
             Console.WriteLine("2. Client Mode");
