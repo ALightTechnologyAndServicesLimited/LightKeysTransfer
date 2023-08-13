@@ -349,7 +349,7 @@ namespace LightKeysTransfer.Implementation
                             {
                                 if (lnnNum > 0 && lnnNum <= lines.Count())
                                 {
-                                    contentToEncrypt = lines[lnnNum + 1];
+                                    contentToEncrypt = lines[lnnNum - 1];
                                     validSelection = true;
                                 }
                             }
@@ -375,6 +375,7 @@ namespace LightKeysTransfer.Implementation
             {
                 Console.WriteLine($"error occurred. {e.Message}");
                 Console.WriteLine("Press <ENTER> for previous menu");
+                Console.ReadLine();
             }
         }
 
