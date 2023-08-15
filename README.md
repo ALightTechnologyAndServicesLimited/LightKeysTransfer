@@ -41,12 +41,20 @@ The entire code base is based on .Net, developed in C#.
 
 ### Personal Links:
 [Facebook - Kanti Arumilli](https://www.facebook.com/kanti.arumilli)
+
 [LinkedIn - Kanti Kalyan Arumilli](https://www.linkedin.com/in/kanti-kalyan-arumilli/)
+
 [Twitter](https://twitter.com/KantiKalyanA/)
+
 [Thread](https://www.threads.net/@kantiarumilli)
+
 [Youtube](https://www.youtube.com/@kantikalyanarumilli)
+
++91-789-362-6688, +1-480-347-6849, +44-3333-03-1284, +44-07718-273-964
 
 ### Startup Links:
 [Facebook](https://www.facebook.com/ALightTechnologyAndServicesLimited/)
+
 [LinkedIn](https://www.linkedin.com/company/alight-technology-and-services-limited/)
+
 [Youtube](https://www.youtube.com/@alighttechnologyandservicesltd)
