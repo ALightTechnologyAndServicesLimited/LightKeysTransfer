@@ -189,6 +189,7 @@ namespace LightKeysTransfer
             Console.WriteLine("Key & IV have been imported.");
         }
 
+
         public string EncryptTripleDES(string plainText)
         {
             plainText = GetTextAndSalt(plainText);
@@ -209,10 +210,10 @@ namespace LightKeysTransfer
             return Convert.ToBase64String(encrypted);
         }
 
+
         public string DecryptTripleDES(string cipherText)
         {
             string plaintext = null;
-            cipherText = RemoveSaltFromText(cipherText);
             var cipherBytes = Convert.FromBase64String(cipherText);
             using (TripleDESCryptoServiceProvider tdes = new TripleDESCryptoServiceProvider())
             {
@@ -226,6 +227,8 @@ namespace LightKeysTransfer
                     }
                 }
             }
+
+            plaintext = RemoveSaltFromText(plaintext);
             return plaintext;
         }
 

@@ -110,10 +110,12 @@ namespace LightKeysTransfer.UnitTests
         [Test]
         public void TestTripleDES()
         {
-            var testText = "Hello";
-
+            var testText = "3viMgEe9w3QREg9KaJTtwdClUmOTeskkBy7R1g7+ceL8Anbllu5ODz9E69lcSbfE4hg+EcUnbVdTWy/A9FBWfvrltMvTSXPuwjdsIj76PHnrThB1DFNdEaJIc6rgqF7is5EqR8ROiFQBlva4iAziPpm8UuXEoHY9H06hmxMmSToNaumfkrp2HkQbIu+UtRLmbyClvUSVoBFZbeRsXzi5o6Pi6pBQW+WYiz3tcBnomggznjJPl/j++OWSPceP/KiMcnVx9KjPiPMtLR01epr4GFn0642mRGghdDt8L+EwMv+K/mI/UNEvlBmmnqQ+8lrbnoVJq9E6/8IwKB+8MTfb6A==";
+            //var testText = "Hello";
             var server = new CryptHelper();
             var client = new CryptHelper();
+
+            //var ret = server.EncryptTripleDES2(testText);
 
             client.GenerateRSAKeyPair();
             client.CopyPublicKey();
