@@ -66,9 +66,8 @@ IKeyTransferHelper ShowLevel1Menu(IEnumerable<IKeyTransferHelper> helpers)
 
     Console.WriteLine("Please enter your selection:");
     var response = Console.ReadLine();
-    var responseIndex = 0;
 
-    if (Int32.TryParse(response, out responseIndex))
+    if (Int32.TryParse(response, out int responseIndex))
     {
         if (responseIndex == count)
         {

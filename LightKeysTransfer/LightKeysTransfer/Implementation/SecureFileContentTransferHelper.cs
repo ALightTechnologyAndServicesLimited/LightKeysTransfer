@@ -10,71 +10,36 @@ namespace LightKeysTransfer.Implementation
 {
     public class SecureFileContentTransferHelper : IKeyTransferHelper
     {
-        public string MainText => "Securely transfer the content of some small file?";
+        readonly CryptHelper cryptHelper = new();
 
+        public string MainText => "Securely transfer the content of some small file?";
         public KeyTransferResult Perform()
         {
-            int taskId = ShowSubTasksMenu();
+            var taskId = ShowSubTasksMenu();
 
             return taskId switch
             {
                 1 => ClientClipBoardToServer(),
-                2 => ServerToClient(),
-                3 => KeyTransferResult.Incomplete,
+                2 => ServerToClient(true),
+                3 => ServerToClient(false),
+                4 => KeyTransferResult.Incomplete,
                 _ => KeyTransferResult.Incomplete,
             };
-
-            //while (true)
-            //{
-            //    Console.Clear();
-            //    Console.WriteLine(MainText);
-            //    Console.WriteLine();
-            //    Console.WriteLine();
-            //    ShowHelp();
-            //    Console.Clear();
-            //    var selection = ShowMenu();
-
-            //    switch (selection)
-            //    {
-            //        case 1:
-            //            ServerMode();
-            //            break;
-            //        case 2:
-            //            ClientMode();
-            //            break;
-            //        case 3:
-            //            ShowHelp();
-            //            selection = ShowMenu();
-            //            break;
-            //        case 4:
-            //            return KeyTransferResult.Incomplete;
-            //        default:
-            //            break;
-            //    }
-            //}
-
-            return KeyTransferResult.Incomplete;
         }
 
-        private static KeyTransferResult ServerToClient()
+        private KeyTransferResult ServerToClient(bool smallFile)
         {
             while (true)
             {
-                Console.Clear();
-                //Console.WriteLine(MainText);
-                Console.WriteLine();
-                Console.WriteLine();
-                ShowHelp();
-                Console.Clear();
-                var selection = ShowMenu();
+                int selection = ShowFileTransferMenu();
 
                 switch (selection)
                 {
                     case 1:
-                        ServerMode();
+                        ServerModeFiles(smallFile);
                         break;
                     case 2:
-                        ClientMode();
+                        ClientModeFiles(smallFile);
                         break;
                     case 3:
                         ShowHelp();
@@ -86,19 +51,29 @@ namespace LightKeysTransfer.Implementation
                         break;
                 }
             }
-
-            return KeyTransferResult.Incomplete;
         }
 
-        private static KeyTransferResult ClientClipBoardToServer()
+        private int ShowFileTransferMenu()
+        {
+            Console.Clear();
+            //Console.WriteLine(MainText);
+            Console.WriteLine();
+            Console.WriteLine();
+            ShowHelp();
+            Console.Clear();
+            var selection = ShowMenu();
+            return selection;
+        }
+
+        private KeyTransferResult ClientClipBoardToServer()
         {
             Console.Clear();
             Console.WriteLine("Enter the text below and press <ENTER>");
-            var secret = Util.GetSensitiveText();
+            var secret = CryptHelper.GetSensitiveText();
             return HandleSecretData(secret);
         }
 
-        private static KeyTransferResult HandleSecretData(string secret)
+        private KeyTransferResult HandleSecretData(string secret)
         {
             while (true)
             {
@@ -129,7 +104,7 @@ namespace LightKeysTransfer.Implementation
             }
         }
 
-        private static KeyTransferResult HandleReplaceText(string secret)
+        private KeyTransferResult HandleReplaceText(string secret)
         {
             try
             {
@@ -229,7 +204,7 @@ namespace LightKeysTransfer.Implementation
             return KeyTransferResult.Incomplete;
         }
 
-        private static KeyTransferResult HandleWriteToFile(string secret)
+        private KeyTransferResult HandleWriteToFile(string secret)
         {
             try
             {
@@ -251,7 +226,7 @@ namespace LightKeysTransfer.Implementation
             }
         }
 
-        private static int ShowSubTasksMenu()
+        private int ShowSubTasksMenu()
         {
             var flag = true;
 
@@ -259,8 +234,9 @@ namespace LightKeysTransfer.Implementation
             {
                 Console.Clear();
                 Console.WriteLine("1. Transfer small information directly by pasting from clipboard of client to server?");
-                Console.WriteLine("2. Encrypt and transfer content of a small file from server to client clipboard?");
-                Console.WriteLine("3. Previous menu");
+                Console.WriteLine("2. Encrypt and transfer content of small file from server to client clipboard?");
+                Console.WriteLine("3. Encrypt and transfer content of medium sized file from server to client clipboard?");
+                Console.WriteLine("4. Previous menu");
                 Console.WriteLine("Please make valid selection and press <ENTER>");
                 var response = Console.ReadLine();
                 if (Int32.TryParse(response, out int responseInt))
@@ -277,39 +253,59 @@ namespace LightKeysTransfer.Implementation
             return 0;
         }
 
-        private static void ClientMode()
+        private void ClientModeFiles(bool smallFile)
         {
             Console.WriteLine("PRESS <ENTER> to generate new public / private key pair.");
             Console.ReadLine();
-            Util.GenerateRSAKeyPair();
+            cryptHelper.GenerateRSAKeyPair();
             Console.WriteLine("New key pair has been generated.");
             Console.WriteLine("Press <ENTER> to copy the public key into clipboard.");
             Console.ReadLine();
-            Util.CopyPublicKey();
+            cryptHelper.CopyPublicKey();
             Console.WriteLine("The public key has been copied to clipboard, press <ENTER> after pasting in the server instance to clear the clipboard.");
             Console.ReadLine();
-            Util.ClearClipBoard();
+            CryptHelper.ClearClipBoard();
+            if (!smallFile)
+            {
+                //Get Key and IV
+                Console.WriteLine("Enter the encrypted Key from the server:");
+                var key = CryptHelper.GetSensitiveText();
+                Console.WriteLine("Enter the encrypted IV from the server:");
+                var iv = CryptHelper.GetSensitiveText();
+
+                cryptHelper.ImportTripleDES(key, iv);
+                Console.WriteLine("Key & IV have been imported.");
+            }
             Console.WriteLine("Enter the encrypted text:");
-            var response = Util.GetSensitiveText();
-            var plainText = Util.DecryptText(response);
+            var response = CryptHelper.GetSensitiveText();
+            string plainText = String.Empty;
+            if (smallFile)
+            {
+                plainText = cryptHelper.DecryptRSA(response);
+            }
+            else
+            {
+                plainText = cryptHelper.DecryptTripleDES(response);
+            }
+
             Console.WriteLine("The text has been decrypted.");
             Console.WriteLine("Press <ENTER> to copy to clipboard");
             Console.ReadLine();
-            Util.CopyToClipBoard(plainText);
+            CryptHelper.CopyToClipBoard(plainText);
             Console.WriteLine("The text has been copied.");
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Press <ENTER> to clear clipboard");
             Console.ReadLine();
-            Util.ClearClipBoard();
+            CryptHelper.ClearClipBoard();
             Console.WriteLine("The text has been cleared");
         }
 
-        private static void ServerMode()
+        private void ServerModeFiles(bool smallFile)
         {
             Console.WriteLine("Enter the public key generated on the client instance of the application, enter the key here and immediately clear the clipboard:");
-            var publicKey = Util.GetSensitiveText();
-            var result = Util.InitializeRSA(publicKey);
+            var publicKey = CryptHelper.GetSensitiveText();
+            var result = cryptHelper.InitializeRSA(publicKey);
             if (!result)
             {
                 Console.WriteLine("There has been an error!");
@@ -318,6 +314,22 @@ namespace LightKeysTransfer.Implementation
                 return;
             }
             Console.WriteLine("The key has been loaded.");
+
+            if (!smallFile)
+            {
+                // Generate Key, IV
+                cryptHelper.GenerateNewTripleDES();
+                cryptHelper.GetEncryptedTripleDESKey();
+                Console.WriteLine("Here is the Key:");
+                Console.WriteLine(cryptHelper.GetEncryptedTripleDESKey());
+                Console.WriteLine("Press <Enter> to continue");
+                Console.ReadLine();
+                Console.WriteLine("Here is the IV:");
+                Console.WriteLine(cryptHelper.GetEncryptedTripleDESIV());
+                Console.WriteLine("Press <Enter> to continue");
+                Console.ReadLine();
+            }
+
             var fileName = GetFileName();
             if (String.IsNullOrEmpty(fileName))
             {
@@ -344,8 +356,7 @@ namespace LightKeysTransfer.Implementation
                         {
                             Console.WriteLine($"Enter the line number ({lines.Count()} lines found.):");
                             var lnn = Console.ReadLine();
-                            int lnnNum = 0;
-                            if (Int32.TryParse(lnn, out lnnNum))
+                            if (Int32.TryParse(lnn, out int lnnNum))
                             {
                                 if (lnnNum > 0 && lnnNum <= lines.Count())
                                 {
@@ -357,13 +368,20 @@ namespace LightKeysTransfer.Implementation
                         break;
                     case 3:
                         return;
-                        break;
                     default:
                         break;
                 }
 
                 Console.WriteLine("Conent read, encrypting...");
-                var enc = Util.EncryptText(contentToEncrypt);
+                string enc = String.Empty;
+                if (smallFile)
+                {
+                    enc = cryptHelper.EncryptRSA(contentToEncrypt);
+                }
+                else
+                {
+                    enc = cryptHelper.EncryptTripleDES(contentToEncrypt);
+                }
                 Console.WriteLine(enc);
                 Console.WriteLine();
                 Console.WriteLine("Press <ENTER> to clear screen and goto previous menu.");
@@ -379,7 +397,7 @@ namespace LightKeysTransfer.Implementation
             }
         }
 
-        private static int ShowFilePartMenu()
+        private int ShowFilePartMenu()
         {
             bool hasSelectionBeenMade = false;
             while (!hasSelectionBeenMade)
@@ -390,8 +408,7 @@ namespace LightKeysTransfer.Implementation
                 Console.WriteLine("Please make a selection: ");
                 var selection = Console.ReadLine();
 
-                var selectionAsInt = 0;
-                if (Int32.TryParse(selection, out selectionAsInt))
+                if (Int32.TryParse(selection, out int selectionAsInt))
                 {
                     if (selectionAsInt > 0 && selectionAsInt < 4)
                     {
@@ -403,7 +420,7 @@ namespace LightKeysTransfer.Implementation
             return 0;
         }
 
-        private static string GetFileContent(string fileName)
+        private string GetFileContent(string fileName)
         {
             var sr = new StreamReader(fileName);
             var content = sr.ReadToEnd();
@@ -412,7 +429,7 @@ namespace LightKeysTransfer.Implementation
             return content;
         }
 
-        private static string GetFileName()
+        private string GetFileName()
         {
             var isValidFile = false;
             var fileName = String.Empty;
@@ -453,7 +470,7 @@ namespace LightKeysTransfer.Implementation
             return fileName;
         }
 
-        private static int ShowMenu()
+        private int ShowMenu()
         {
             Console.WriteLine("1. Server Mode");
             Console.WriteLine("2. Client Mode");
@@ -475,9 +492,9 @@ namespace LightKeysTransfer.Implementation
             return 0;
         }
 
-        static void ShowHelp()
+        void ShowHelp()
         {
-            Console.WriteLine("This mode allows transferring content of some small file securely without using SFTP or SCP.");
+            Console.WriteLine("This mode allows transferring content of some small files, medium sized files securely without using SFTP or SCP.");
             Console.WriteLine("The file can be on the server, the content gets transferred encrypted, without getting stored on the client.");
             Console.WriteLine("Then the decrypted content can be copied into clipboard, used and clipboard can be cleared.");
             Console.WriteLine("This way, the content of file gets transferred encrypted, does not get persisted on client.");
@@ -488,17 +505,16 @@ namespace LightKeysTransfer.Implementation
             Console.WriteLine("The tool can run in server mode and client mode.");
             Console.WriteLine("ServerMode:");
             Console.WriteLine("Accepts file to be read, random but cryptographically strong public key.");
-            Console.WriteLine("Encrypts the content and displays the encrypted content.");
+            Console.WriteLine("*** Option - 3: For medium sized files, encrypted symmetric key gets displayed, then encrypted content");
+            Console.WriteLine("*** Option - 2: For small sized files, encrypted content gets displayed.");
             Console.WriteLine("ClientMode:");
             Console.WriteLine("Generates a cryptographically strong keypair and displays public key");
             Console.WriteLine("The public key needs to be entered in the server app:");
-            Console.WriteLine("The server displays encrypted text that needs to be copied and pasted.");
-            Console.WriteLine("The decrypted value can be copied.");
+            Console.WriteLine("*** Option - 3: For medium sized files, copy and paste the encrypted key from server, then the encrypted content.");
+            Console.WriteLine("*** Option - 2: For small sized files, copy and paste encrypted text from server.");
+            Console.WriteLine("Then the decrypted value can be copied into clipboard.");
             Console.WriteLine("Shortcomings:");
             Console.WriteLine("Over the long-term someone might brute-force the private key and the content");
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("Alternatives: SCP/SFTP the file, use Mode 5 to read contents without displaying on screen and delete the file.");
             Console.WriteLine();
             Console.WriteLine("PRESS <ENTER> TO CONTINUE...");
             Console.ReadLine();
