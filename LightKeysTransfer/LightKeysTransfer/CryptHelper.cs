@@ -17,7 +17,7 @@ namespace LightKeysTransfer
         public byte[] IV { get; set; }
 
         #region Static Utility Methods
-        public static string GetSensitiveText()
+        public static string GetSensitiveText(bool trimText = true)
         {
             StringBuilder password = new StringBuilder();
             ConsoleKeyInfo keyInfo = Console.ReadKey(true);
@@ -29,7 +29,10 @@ namespace LightKeysTransfer
                 keyInfo = Console.ReadKey(true);
             }
 
-            return password.ToString();
+            var retVal = password.ToString();
+
+            if (trimText) retVal = retVal.Trim();
+            return retVal;
         }
 
         public static void ClearClipBoard()
@@ -182,6 +185,8 @@ namespace LightKeysTransfer
             KEY = Convert.FromBase64String(keyTxt);
             var ivTxt = DecryptRSA(encIV);
             IV = Convert.FromBase64String(ivTxt);
+
+            Console.WriteLine("Key & IV have been imported.");
         }
 
         public string EncryptTripleDES(string plainText)

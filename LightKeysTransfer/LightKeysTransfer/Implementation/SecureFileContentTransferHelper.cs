@@ -69,7 +69,7 @@ namespace LightKeysTransfer.Implementation
         {
             Console.Clear();
             Console.WriteLine("Enter the text below and press <ENTER>");
-            var secret = CryptHelper.GetSensitiveText();
+            var secret = CryptHelper.GetSensitiveText(false);
             return HandleSecretData(secret);
         }
 
@@ -274,7 +274,6 @@ namespace LightKeysTransfer.Implementation
                 var iv = CryptHelper.GetSensitiveText();
 
                 cryptHelper.ImportTripleDES(key, iv);
-                Console.WriteLine("Key & IV have been imported.");
             }
             Console.WriteLine("Enter the encrypted text:");
             var response = CryptHelper.GetSensitiveText();
