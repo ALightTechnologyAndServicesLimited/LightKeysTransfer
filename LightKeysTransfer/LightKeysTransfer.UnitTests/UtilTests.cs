@@ -1,4 +1,6 @@
+using LightKeysTransfer.Common;
 using Microsoft.VisualStudio.TestPlatform.Utilities;
+using System.Text;
 using TextCopy;
 
 namespace LightKeysTransfer.UnitTests
@@ -27,6 +29,25 @@ namespace LightKeysTransfer.UnitTests
         public void TestEncryptDecryptWithStringLengthOf1()
         {
             var plainText = "1";
+            cryptHelper.GenerateRSAKeyPair();
+
+            var enc = cryptHelper.EncryptRSA(plainText);
+            var dec = cryptHelper.DecryptRSA(enc);
+
+            Assert.AreEqual(plainText, dec);
+        }
+
+        [Test]
+        public void TestEncryptDecryptWithStringLengthOf84()
+        {
+            var sb = new StringBuilder();
+            var i = 0;
+            while (sb.Length < 84)
+            {
+                sb.Append(i++);
+            }
+
+            var plainText = sb.ToString();
             cryptHelper.GenerateRSAKeyPair();
 
             var enc = cryptHelper.EncryptRSA(plainText);

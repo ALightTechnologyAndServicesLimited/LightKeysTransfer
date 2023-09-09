@@ -1,4 +1,5 @@
 ﻿using LightKeysTransfer.Abstract;
+using LightKeysTransfer.Common;
 using LightKeysTransfer.Entities;
 using System;
 using System.Collections.Generic;
@@ -288,6 +289,7 @@ namespace LightKeysTransfer.Implementation
             }
 
             Console.WriteLine("The text has been decrypted.");
+
             Console.WriteLine("Press <ENTER> to copy to clipboard");
             Console.ReadLine();
             CryptHelper.CopyToClipBoard(plainText);

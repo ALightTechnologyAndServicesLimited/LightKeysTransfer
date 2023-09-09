@@ -9,3 +9,9 @@
 /LightKeysTransfer/LightKeysTransfer.UnitTests/obj
 /LightKeysTransfer/LightKeysTransfer/Properties/PublishProfiles
 /LightKeysTransfer/LightKeysTransfer/LightKeysTransfer.csproj.user
+/LightKeysTransfer/LightKeysTransfer.Common/bin
+/LightKeysTransfer/LightKeysTransfer.Common/obj/Debug
+/LightKeysTransfer/LightKeysTransfer.Common/obj
+/LightKeysTransfer/LightKeysTransfer.WinClient/bin
+/LightKeysTransfer/LightKeysTransfer.WinClient/obj
+/LightKeysTransfer/InternalTrace.*.log
