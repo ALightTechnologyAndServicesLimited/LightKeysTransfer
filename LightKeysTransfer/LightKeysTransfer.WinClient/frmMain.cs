@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+//Not complete
+
 namespace LightKeysTransfer.WinClient
 {
     public partial class frmMain : Form
@@ -31,6 +33,8 @@ namespace LightKeysTransfer.WinClient
 
         private void btnGenerateKeyPair_Click(object sender, EventArgs e)
         {
+            cryptHelper.InitializeRSA("");
+            cryptHelper.EncryptRSA("");
             cryptHelper.GenerateRSAKeyPair();
         }
 
